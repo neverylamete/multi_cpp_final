@@ -31,6 +31,8 @@
 *.out
 *.app
 
+#debug 
+*cmake-build-debug*
 
 ### C++ template
 # Compiled Object files
