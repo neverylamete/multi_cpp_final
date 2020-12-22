@@ -7,6 +7,7 @@
 #include "arpa/inet.h"
 #include "vector"
 #include <thread>
+#include "sys/select.h"
 
 class thread_param
 {
@@ -27,6 +28,43 @@ extern char *optarg;
 
 void client_thread(thread_param &param)
 {
+    int fd = param.fd;
+
+    int buf_len_in = 1000;
+    int len_out = 0;
+    int read_len = 0;
+    char *buf_in[buf_len_in];
+    char *buf_out[buf_len_in];
+
+    fd_set rfds;
+    struct timeval tm;
+    int retval;
+
+    while (1)
+    {
+
+        tm.tv_sec = 0;
+        tm.tv_usec = 500;
+
+        FD_ZERO(&rfds);
+        FD_SET(fd, &rfds);
+
+        retval = select(fd + 1, &rfds, NULL, NULL, &tm);
+        if (retval)
+        {
+            if (FD_ISSET(fd, &rfds))
+            {
+                read_len = read(fd, buf_in, buf_len_in);
+                if (read_len < 0)
+                {
+                    shutdown(fd, SHUT_RDWR);
+                    break;
+                }
+            }
+        }
+
+    }
+    param.status = 1;
 
 }
 
