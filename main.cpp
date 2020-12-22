@@ -46,10 +46,13 @@ int main(int argc, char *argv[])
 
     }
 
-
     std::cout << "ip=" << ip_opt << std::endl;
     std::cout << "port=" << port_opt << std::endl;
     std::cout << "dir=" << dir_opt << std::endl;
+
+
+
+
 
     return 0;
 }
