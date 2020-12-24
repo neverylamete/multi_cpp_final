@@ -92,7 +92,6 @@ std::string http_cmd_resolver(const httpparser::Request &request)
         fst.close();
 
 
-
     }
     else if(request.method == "POST")
     {
@@ -218,6 +217,19 @@ int main(int argc, char *argv[])
     std::cout << "ip=" << ip_opt << std::endl;
     std::cout << "port=" << port_opt << std::endl;
     std::cout << "dir=" << dir_opt << std::endl;
+
+    //fork
+
+    int a = fork();
+    if(a > 0)
+    {
+        return 0;
+    }
+    else if(a < 0)
+    {
+        return -1;
+    }
+
 
     int server_sock = 0;
     struct sockaddr_in addr;
