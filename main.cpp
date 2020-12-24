@@ -61,22 +61,38 @@ std::string http_cmd_resolver(const httpparser::Request &request)
     if(request.method == "GET")
     {
         std::string fl_path(dir_opt);
-        if(fl_path[fl_path.size() - 1] != '/')
-        {
-            fl_path += '/';
-        }
+//        if(fl_path[fl_path.size() - 1] != '/')
+//        {
+//            fl_path += '/';
+//        }
         fl_path += request.uri;
 
-        int fd = open(fl_path.c_str(), O_RDONLY);
-        if(fd > 0)
+
+        std::ifstream fst(fl_path.c_str());
+        if(fst.is_open())
         {
             tmp = make_http_header(true);
-            //need read data
+
+            while(1)
+            {
+                std::string str("");
+
+                std::getline(fst, str);
+
+                if(str != "")
+                {
+                    tmp += str;
+                }
+
+            }
         }
         else
         {
             tmp = make_http_header(false);
         }
+        fst.close();
+
+        tmp += "\r\n";
 
     }
     else if(request.method == "POST")
