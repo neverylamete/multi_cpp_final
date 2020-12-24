@@ -8,17 +8,21 @@
 #include "vector"
 #include <thread>
 #include "sys/select.h"
+#include "list"
+
 
 class thread_param
 {
 public:
     std::thread th;
-    int status;
+    int closed;
+    int need_close;
     int fd;
 
     thread_param()
     {
-        status = -1;
+        closed = 0;
+        need_close = 0;
         fd = -1;
     }
 
@@ -26,9 +30,9 @@ public:
 
 extern char *optarg;
 
-void client_thread(thread_param &param)
+void client_thread(thread_param *param)
 {
-    int fd = param.fd;
+    int fd = param->fd;
 
     int buf_len_in = 1000;
     int len_out = 0;
@@ -40,7 +44,7 @@ void client_thread(thread_param &param)
     struct timeval tm;
     int retval;
 
-    while (1)
+    while(param->need_close == 0)
     {
 
         tm.tv_sec = 0;
@@ -50,12 +54,12 @@ void client_thread(thread_param &param)
         FD_SET(fd, &rfds);
 
         retval = select(fd + 1, &rfds, NULL, NULL, &tm);
-        if (retval)
+        if(retval)
         {
-            if (FD_ISSET(fd, &rfds))
+            if(FD_ISSET(fd, &rfds))
             {
                 read_len = read(fd, buf_in, buf_len_in);
-                if (read_len < 0)
+                if(read_len < 0)
                 {
                     shutdown(fd, SHUT_RDWR);
                     break;
@@ -64,7 +68,7 @@ void client_thread(thread_param &param)
         }
 
     }
-    param.status = 1;
+    param->closed = 1;
 
 }
 
@@ -84,9 +88,9 @@ int main(int argc, char *argv[])
             {0, 0,                      0, 0,}
     };
 
-    while ((opchar = getopt_long(argc, argv, "h:p:d:", opts, &opindex)) != -1)
+    while((opchar = getopt_long(argc, argv, "h:p:d:", opts, &opindex)) != -1)
     {
-        switch (opchar)
+        switch(opchar)
         {
             case 'h' :
                 ip_opt = optarg;
@@ -119,7 +123,7 @@ int main(int argc, char *argv[])
     addr.sin_port = htons(port_opt);
     addr.sin_addr.s_addr = inet_addr(ip_opt);
 
-    if (bind(server_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
+    if(bind(server_sock, (struct sockaddr *) &addr, sizeof(addr)) < 0)
     {
         perror("bind error");
         return 1;
@@ -127,25 +131,29 @@ int main(int argc, char *argv[])
 
     listen(server_sock, 100);
 
-    std::vector<thread_param> vc;
-    while (1)
+    std::vector<thread_param *> vc;
+    while(1)
     {
         int client_fd = accept(server_sock, 0, 0);
 
-        thread_param tmp;
 
-        tmp.fd = client_fd;
-        //make thread
+        thread_param *tmp = new thread_param();
 
-        tmp.th = std::thread(client_thread, std::ref(tmp));
         vc.push_back(tmp);
 
+        vc.back()->fd = client_fd;
+
+        vc.back()->need_close = 1;
+        //make thread
+
+        vc.back()->th = std::thread(client_thread, vc.back());
+
         auto it = vc.begin();
-        while (it != vc.end())
+        while(it != vc.end())
         {
-            if (it->status == 1)
+            if((*it)->closed == 1)
             {
-                it->th.join();
+                (*it)->th.join();
                 it = vc.erase(it);
             }
             else
