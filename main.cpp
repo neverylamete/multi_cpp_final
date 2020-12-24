@@ -40,16 +40,20 @@ public:
 
 extern char *optarg;
 
-std::string make_http_header(bool good)
+std::string make_http_header(bool good, int length = 0)
 {
-    std::string tmp;
+    std::string tmp = "";
     if(good)
     {
 
+        tmp += "HTTP/1.1 200 OK\r\n";
+        tmp += "Content-Type: text/html\r\n";
+        tmp += "Content-Length: " + std::to_string(length) + "\r\n";
+        tmp += "Connection: keep-alive\r\n";
     }
     else
     {
-
+        tmp += "HTTP/1.1 404 NOT FOUND\r\n";
     }
     return tmp;
 }
@@ -67,24 +71,14 @@ std::string http_cmd_resolver(const httpparser::Request &request)
 //        }
         fl_path += request.uri;
 
-
         std::ifstream fst(fl_path.c_str());
         if(fst.is_open())
         {
-            tmp = make_http_header(true);
+            std::stringstream ss;
+            ss << fst.rdbuf();
 
-            while(1)
-            {
-                std::string str("");
-
-                std::getline(fst, str);
-
-                if(str != "")
-                {
-                    tmp += str;
-                }
-
-            }
+            tmp = make_http_header(true,ss.str().size());
+            tmp += ss.str();
         }
         else
         {
@@ -92,6 +86,7 @@ std::string http_cmd_resolver(const httpparser::Request &request)
         }
         fst.close();
 
+        tmp += "\r\n";
         tmp += "\r\n";
 
     }
