@@ -3,6 +3,8 @@ project(multi_cpp_final)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 SET(HTTP_PARSER_PATH libs/httpparser/src)
 
 include_directories(${HTTP_PARSER_PATH})

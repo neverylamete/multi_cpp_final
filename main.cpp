@@ -96,7 +96,7 @@ std::string http_cmd_resolver(const httpparser::Request &request)
     }
     else if(request.method == "POST")
     {
-        int i = 0;
+        tmp = make_http_header(false);
     }
     return tmp;
 
