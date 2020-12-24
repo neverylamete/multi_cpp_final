@@ -7,8 +7,18 @@
 #include "arpa/inet.h"
 #include "vector"
 #include <thread>
+#include <cstring>
 #include "sys/select.h"
 #include "list"
+#include "string"
+#include "fcntl.h"
+#include "fstream"
+
+#include "httpparser/request.h"
+#include "httpparser/httprequestparser.h"
+
+//GLOBAL VARS
+char *dir_opt;
 
 
 class thread_param
@@ -30,6 +40,54 @@ public:
 
 extern char *optarg;
 
+std::string make_http_header(bool good)
+{
+    std::string tmp;
+    if(good)
+    {
+
+    }
+    else
+    {
+
+    }
+    return tmp;
+}
+
+
+std::string http_cmd_resolver(const httpparser::Request &request)
+{
+    std::string tmp;
+    if(request.method == "GET")
+    {
+        std::string fl_path(dir_opt);
+        if(fl_path[fl_path.size() - 1] != '/')
+        {
+            fl_path += '/';
+        }
+        fl_path += request.uri;
+
+        int fd = open(fl_path.c_str(), O_RDONLY);
+        if(fd > 0)
+        {
+            tmp = make_http_header(true);
+            //need read data
+        }
+        else
+        {
+            tmp = make_http_header(false);
+        }
+
+    }
+    else if(request.method == "POST")
+    {
+        int i = 0;
+    }
+    return tmp;
+
+}
+
+
 void client_thread(thread_param *param)
 {
     int fd = param->fd;
@@ -37,16 +95,17 @@ void client_thread(thread_param *param)
     int buf_len_in = 1000;
     int len_out = 0;
     int read_len = 0;
-    char *buf_in[buf_len_in];
-    char *buf_out[buf_len_in];
+    char buf_in[buf_len_in];
+    char buf_out[buf_len_in];
 
     fd_set rfds;
     struct timeval tm;
     int retval;
 
+
     while(param->need_close == 0)
     {
-
+        memset(buf_in, 0, buf_len_in);
         tm.tv_sec = 0;
         tm.tv_usec = 500;
 
@@ -59,15 +118,45 @@ void client_thread(thread_param *param)
             if(FD_ISSET(fd, &rfds))
             {
                 read_len = read(fd, buf_in, buf_len_in);
+                std::cout << buf_in << std::endl;
+
                 if(read_len < 0)
                 {
                     shutdown(fd, SHUT_RDWR);
                     break;
                 }
+                else
+                {
+                    httpparser::Request request;
+                    httpparser::HttpRequestParser parser;
+
+                    httpparser::HttpRequestParser::ParseResult res = parser.parse(request, buf_in,
+                                                                                  buf_in + strlen(buf_in));
+
+                    if(res == httpparser::HttpRequestParser::ParsingCompleted)
+                    {
+                        std::cout << request.inspect() << std::endl;
+
+                        std::string ans = http_cmd_resolver(request);
+
+                        if(send(fd, ans.c_str(), strlen(ans.c_str()), 0) < 0)
+                        {
+                            shutdown(fd, SHUT_RDWR);
+                            break;
+                        }
+
+                    }
+                    else
+                    {
+                        std::cerr << "Parsing failed" << std::endl;
+
+                    }
+                }
             }
         }
-
     }
+
+
     param->closed = 1;
 
 }
@@ -76,7 +165,7 @@ int main(int argc, char *argv[])
 {
     int port_opt;
     char *ip_opt;
-    char *dir_opt;
+
     std::cout << "start" << std::endl;
 
     int opindex;
@@ -143,7 +232,6 @@ int main(int argc, char *argv[])
 
         vc.back()->fd = client_fd;
 
-        vc.back()->need_close = 1;
         //make thread
 
         vc.back()->th = std::thread(client_thread, vc.back());
