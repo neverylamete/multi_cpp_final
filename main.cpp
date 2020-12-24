@@ -46,14 +46,17 @@ std::string make_http_header(bool good, int length = 0)
     if(good)
     {
 
-        tmp += "HTTP/1.1 200 OK\r\n";
+        tmp += "HTTP/1.0 200 OK\r\n";
         tmp += "Content-Type: text/html\r\n";
         tmp += "Content-Length: " + std::to_string(length) + "\r\n";
-        tmp += "Connection: keep-alive\r\n";
+        tmp += "Connection: close\r\n";
+        tmp += "\r\n";
     }
     else
     {
-        tmp += "HTTP/1.1 404 NOT FOUND\r\n";
+        tmp += "HTTP/1.0 404 NOT FOUND\r\n";
+        tmp += "Connection: close\r\n";
+        tmp += "\r\n";
     }
     return tmp;
 }
@@ -77,8 +80,10 @@ std::string http_cmd_resolver(const httpparser::Request &request)
             std::stringstream ss;
             ss << fst.rdbuf();
 
-            tmp = make_http_header(true,ss.str().size());
+            tmp = make_http_header(true, ss.str().size());
             tmp += ss.str();
+            tmp += "\r\n";
+            tmp += "\r\n";
         }
         else
         {
@@ -86,8 +91,7 @@ std::string http_cmd_resolver(const httpparser::Request &request)
         }
         fst.close();
 
-        tmp += "\r\n";
-        tmp += "\r\n";
+
 
     }
     else if(request.method == "POST")
@@ -146,11 +150,11 @@ void client_thread(thread_param *param)
 
                     if(res == httpparser::HttpRequestParser::ParsingCompleted)
                     {
-                        std::cout << request.inspect() << std::endl;
-
                         std::string ans = http_cmd_resolver(request);
 
-                        if(send(fd, ans.c_str(), strlen(ans.c_str()), 0) < 0)
+                        std::cout << ans << std::endl;
+
+                        send(fd, ans.c_str(), strlen(ans.c_str()), 0);
                         {
                             shutdown(fd, SHUT_RDWR);
                             break;
