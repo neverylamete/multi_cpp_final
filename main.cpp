@@ -185,7 +185,7 @@ void client_thread(thread_param *param)
 int main(int argc, char *argv[])
 {
     int port_opt;
-    char *ip_opt;
+    char *ip_opt="0.0.0.0";
 
     std::cout << "start" << std::endl;
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         switch(opchar)
         {
             case 'h' :
-                ip_opt = optarg;
+//                ip_opt = optarg;
                 break;
             case 'p' :
                 port_opt = atoi(optarg);
@@ -238,6 +238,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     int server_sock = 0;
     struct sockaddr_in addr;
