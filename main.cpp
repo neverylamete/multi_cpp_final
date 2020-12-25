@@ -70,11 +70,17 @@ std::string http_cmd_resolver(const httpparser::Request &request)
     if(request.method == "GET")
     {
         std::string fl_path(dir_opt);
-//        if(fl_path[fl_path.size() - 1] != '/')
-//        {
-//            fl_path += '/';
-//        }
-        fl_path += request.uri;
+
+        if(request.uri.find('?') == std::string::npos)
+        {
+            fl_path += request.uri;
+        }
+        else
+        {
+            auto ps = request.uri.find('?');
+            fl_path += request.uri.substr(0, ps);
+        }
+
 
         std::ifstream fst(fl_path.c_str());
         if(fst.is_open())
@@ -221,15 +227,15 @@ int main(int argc, char *argv[])
 
     //fork
 
-    int a = fork();
-    if(a > 0)
-    {
-        return 0;
-    }
-    else if(a < 0)
-    {
-        return -1;
-    }
+//    int a = fork();
+//    if(a > 0)
+//    {
+//        return 0;
+//    }
+//    else if(a < 0)
+//    {
+//        return -1;
+//    }
 
 
     int server_sock = 0;
