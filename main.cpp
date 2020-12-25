@@ -84,8 +84,8 @@ std::string http_cmd_resolver(const httpparser::Request &request)
 
             tmp = make_http_header(true, ss.str().size());
             tmp += ss.str();
-            tmp += "\r\n";
-            tmp += "\r\n";
+//            tmp += "\r\n";
+//            tmp += "\r\n";
         }
         else
         {
