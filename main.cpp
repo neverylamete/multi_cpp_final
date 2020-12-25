@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
             if((*it)->closed == 1)
             {
                 (*it)->th.join();
-                it = vc.erase(it);
                 close((*it)->fd);
+                it = vc.erase(it);
             }
             else
             {
