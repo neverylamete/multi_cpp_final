@@ -138,7 +138,7 @@ void client_thread(thread_param *param)
             if(FD_ISSET(fd, &rfds))
             {
                 read_len = read(fd, buf_in, buf_len_in);
-                std::cout << buf_in << std::endl;
+//                std::cout << buf_in << std::endl;
 
                 if(read_len < 0)
                 {
@@ -157,7 +157,7 @@ void client_thread(thread_param *param)
                     {
                         std::string ans = http_cmd_resolver(request);
 
-                        std::cout << ans << std::endl;
+//                        std::cout << ans << std::endl;
 
                         send(fd, ans.c_str(), strlen(ans.c_str()), 0);
                         {
