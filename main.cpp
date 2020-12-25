@@ -230,6 +230,7 @@ int main(int argc, char *argv[])
     int a = fork();
     if(a > 0)
     {
+        std::cout << "pd=" << a << std::endl;
         return 0;
     }
     else if(a < 0)
