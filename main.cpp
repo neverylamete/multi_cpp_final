@@ -49,7 +49,7 @@ std::string make_http_header(bool good, int length = 0)
         tmp += "HTTP/1.0 200 OK\r\n";
         tmp += "Content-Length: " + std::to_string(length) + "\r\n";
         tmp += "Content-Type: text/html\r\n";
-        tmp += "Connection: close\r\n";
+//        tmp += "Connection: close\r\n";
         tmp += "\r\n";
     }
     else
@@ -84,8 +84,6 @@ std::string http_cmd_resolver(const httpparser::Request &request)
 
             tmp = make_http_header(true, ss.str().size());
             tmp += ss.str();
-//            tmp += "\r\n";
-//            tmp += "\r\n";
         }
         else
         {
