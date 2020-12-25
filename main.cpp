@@ -227,15 +227,15 @@ int main(int argc, char *argv[])
 
     //fork
 
-//    int a = fork();
-//    if(a > 0)
-//    {
-//        return 0;
-//    }
-//    else if(a < 0)
-//    {
-//        return -1;
-//    }
+    int a = fork();
+    if(a > 0)
+    {
+        return 0;
+    }
+    else if(a < 0)
+    {
+        return -1;
+    }
 
 
     int server_sock = 0;
