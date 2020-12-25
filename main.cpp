@@ -49,7 +49,7 @@ std::string make_http_header(bool good, int length = 0)
         tmp += "HTTP/1.0 200 OK\r\n";
         tmp += "Content-Length: " + std::to_string(length) + "\r\n";
         tmp += "Content-Type: text/html\r\n";
-        tmp += "Connection: close\r\n";
+//        tmp += "Connection: close\r\n";
         tmp += "\r\n";
     }
     else
@@ -57,7 +57,7 @@ std::string make_http_header(bool good, int length = 0)
         tmp += "HTTP/1.0 404 NOT FOUND\r\n";
         tmp += "Content-Length: 0\r\n";
         tmp += "Content-Type: text/html\r\n";
-        tmp += "Connection: close\r\n";
+//        tmp += "Connection: close\r\n";
         tmp += "\r\n";
     }
     return tmp;
