@@ -156,6 +156,7 @@ void client_thread(thread_param *param)
                         send(fd, ans.c_str(), strlen(ans.c_str()), 0);
                         {
                             shutdown(fd, SHUT_RDWR);
+                            param->need_close = 1;
                             break;
                         }
 
