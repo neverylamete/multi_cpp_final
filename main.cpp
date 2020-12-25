@@ -159,7 +159,11 @@ void client_thread(thread_param *param)
 
 //                        std::cout << ans << std::endl;
 
-                        send(fd, ans.c_str(), strlen(ans.c_str()), 0);
+                        char send_char[strlen(ans.c_str())];
+
+                        memcpy(send_char, ans.c_str(), strlen(ans.c_str()));
+
+                        send(fd, send_char, strlen(send_char), 0);
                         {
                             shutdown(fd, SHUT_RDWR);
                             param->need_close = 1;
@@ -185,7 +189,7 @@ void client_thread(thread_param *param)
 int main(int argc, char *argv[])
 {
     int port_opt;
-    char *ip_opt="0.0.0.0";
+    char *ip_opt = "0.0.0.0";
 
     std::cout << "start" << std::endl;
 
@@ -226,7 +230,7 @@ int main(int argc, char *argv[])
     std::cout << "dir=" << dir_opt << std::endl;
 
     //fork
-
+    //debug
     int a = fork();
     if(a > 0)
     {
@@ -241,6 +245,8 @@ int main(int argc, char *argv[])
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
+
+    //debug
 
     int server_sock = 0;
     struct sockaddr_in addr;
